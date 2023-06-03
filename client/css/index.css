@@ -1,0 +1,36 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #333;
+    color: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header .logo .logo-image {
+    width: 150px;
+    margin-left: 20px;
+}
+
+
+.header .login-button {
+    background-color: #fff;
+    color: #333;
+    border-radius: 6px;
+    height: 30px;
+    width: 80px;
+    margin-right: 20px;
+}
+
+.navigation {
+    margin-left: auto;
+    margin-right: 20px;
+}
