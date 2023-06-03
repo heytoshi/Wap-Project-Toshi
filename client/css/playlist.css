@@ -29,3 +29,47 @@
     width: 80px;
     margin-right: 20px;
 }
+
+
+table {
+    border-collapse: collapse;
+    width: fit-content;
+}
+
+th, td {
+    padding: 8px;
+    text-align: center;
+    border: 1px solid #333
+}
+
+tr {
+    background-color:#d1cece;
+}
+
+tr:first-child {
+    background-color: #9f9f9f;
+}
+
+.table-parent-container {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    width: 90%;
+    margin: auto;
+}
+
+.table-container {
+    border-radius: 8px; 
+    margin-top: 20px;
+    border: 1px solid #c0c0c0;
+    overflow: hidden;
+    width: 100%;
+}
+
+.song-list {
+    margin-top: 100px;
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
