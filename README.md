@@ -2,12 +2,16 @@
 
 ## Installation
 
-To install and set up the library, go to server folder and run:
+To install and set up the library, run:
+
+```sh
+$ cd server
+```
 
 ```sh
 $ npm install
 ```
 
 ```sh
-$ node index.js
+$ npm start
 ```
