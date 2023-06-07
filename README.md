@@ -15,3 +15,12 @@ $ npm install
 ```sh
 $ npm start
 ```
+
+Login info:
+
+```jsx
+ users: [
+    { username: "Test", password: "123", playlist: []},
+    { username: "Test2", password: "111", playlist: []},
+  ]
+```
