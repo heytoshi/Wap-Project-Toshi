@@ -31,6 +31,13 @@ document.addEventListener("DOMContentLoaded", () => {
         playlistArray = result;
         renderTable();
         renderMyPlaylist();
+        if(playlistArray.length > 0) {
+          document.getElementById('playlist-table').style.display = ''
+          document.getElementById('empty-title').style.display = 'none'
+        } else {
+          document.getElementById('playlist-table').style.display = 'none'
+          document.getElementById('empty-title').style.display = ''
+        }
       });
     })
     .catch((error) => {
@@ -67,7 +74,8 @@ function renderTable() {
 function renderMyPlaylist() {
   let myPlaylist = '<div class="my-playlist">';
   myPlaylist += "<h1>Your playlist</h1>";
-  myPlaylist += '<table class="table-container">';
+  myPlaylist += `<h2 id="empty-title">It's empty! Please, add songs!</h2>`
+  myPlaylist += '<table id="playlist-table" class="table-container">';
   myPlaylist += '<tr class="first-child-playlist">';
   myPlaylist += "<td>Index</td>";
   myPlaylist += "<td>Title</td>";
@@ -160,6 +168,8 @@ function removeFromPlaylist(event) {
           audioPlayer.pause();
           audioPlayer.currentTime = 0;
           musicPlayer.style.display = "none";
+          document.getElementById('playlist-table').style.display = 'none'
+          document.getElementById('empty-title').style.display = ''
         }
       } else {
         alert("Failed to remove song from playlist");
@@ -222,6 +232,8 @@ function addToPlaylist(event) {
         }
 
         playlistArray.push(result.data);
+        document.getElementById('playlist-table').style.display = ''
+        document.getElementById('empty-title').style.display = 'none'
       } else {
         alert("Song already in playlist");
       }

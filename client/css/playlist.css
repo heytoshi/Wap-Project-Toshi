@@ -148,3 +148,7 @@ tr {
     justify-content: space-between;
     width: 100px;
 }
+
+.my-playlist h2 {
+    margin-top: 50px;
+}
