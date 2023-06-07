@@ -6,6 +6,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="css/playlist.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" />
+
     <title>Toshi Project</title>
 </head>
 
@@ -17,6 +19,37 @@
         <button class="logout-button">Logout</button>
     </header>
     <div id="table-parent-container" class="table-parent-container"></div>
+
+    <div class="music-player">
+        <audio id="audioPlayer">
+            <source src="http://localhost:3000/playlist/get/playlist/song/1.mp3" type="audio/mpeg">
+        </audio>
+        <div class="controls">
+            <div id="prevButton">
+                <i class="fa-solid fa-backward"></i>
+            </div>
+            <div id="playPauseButton">
+                <i class="fa-solid fa-play"></i>
+            </div>
+            <div d="nextButton">
+                <i id="nextButton" class="fa-solid fa-forward"></i>
+
+            </div>
+        </div>
+        <div class="progress-bar-container">
+            <h3>Paganini Etude 3 La Campanella	</h3>
+            <div class="progress-bar">
+                <div id="progress"></div>
+                <div id="progress-ball"></div>
+            </div>
+        </div>
+        <div class="extra-controls">
+            <i id="shuffleButton" class="fa-solid fa-arrow-down-short-wide"></i>        
+        </div>
+    </div>
+
     <script src="./js/playlist.js"></script>
+    <script src="./js/player.js"></script>
 </body>
+
 </html>

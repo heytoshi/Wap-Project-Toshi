@@ -1,4 +1,6 @@
 const db = require("../db/db.js");
+const fs = require("fs");
+const path = require("path");
 
 const getSongs = (req, res) => {
   if (db.songList === undefined || db.songList.length === 0) {
@@ -27,7 +29,7 @@ const getMyPlaylist = (req, res) => {
 const removeSongMyPlaylist = (req, res) => {
   const username = req.body.username;
   const songIndex = req.body.index;
- 
+
   if (songIndex === undefined || username === undefined) {
     res.status(404).json({
       error: "Undefined body variable",
@@ -105,4 +107,50 @@ const getSongTitle = (songId) => {
   return song ? song.title : null;
 };
 
-module.exports = { getSongs, addSongMyPlaylist, getMyPlaylist, removeSongMyPlaylist};
+const getSong = (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(__dirname, "../songs", filename);
+
+  if (fs.existsSync(filePath)) {
+    const fileStat = fs.statSync(filePath);
+    const fileSize = fileStat.size;
+
+    const range = req.headers.range;
+
+    if (range) {
+      const [start, end] = range.replace(/bytes=/, "").split("-");
+      const fileStream = fs.createReadStream(filePath, {
+        start: parseInt(start),
+        end: parseInt(end) || fileSize - 1,
+      });
+
+      const contentLength = end ? parseInt(end) - parseInt(start) + 1 : fileSize - parseInt(start);
+
+      res.writeHead(206, {
+        "Content-Range": `bytes ${start}-${end || fileSize - 1}/${fileSize}`,
+        "Accept-Ranges": "bytes",
+        "Content-Length": contentLength,
+        "Content-Type": "audio/mpeg",
+      });
+
+      fileStream.pipe(res);
+    } else {
+      res.writeHead(200, {
+        "Content-Length": fileSize,
+        "Content-Type": "audio/mpeg",
+      });
+
+      fs.createReadStream(filePath).pipe(res);
+    }
+  } else {
+    res.status(404).send("File not found");
+  }
+};
+
+module.exports = {
+  getSongs,
+  addSongMyPlaylist,
+  getMyPlaylist,
+  removeSongMyPlaylist,
+  getSong,
+};

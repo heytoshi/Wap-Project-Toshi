@@ -1,24 +1,22 @@
 const url = "http://localhost:3000";
+
 let data = [];
+let playlistArray = [];
 
 const token = localStorage.getItem("token");
 const username = localStorage.getItem("username");
 
+document.addEventListener("click", function (event) {
+  if (event.target.id === "add-button") {
+    addToPlaylist(event);
+  } else if (event.target.id === "remove-button") {
+    removeFromPlaylist(event);
+  }
+});
+
 document.addEventListener("DOMContentLoaded", () => {
   const loginButton = document.querySelector(".logout-button");
   loginButton.addEventListener("click", logoutUser);
-
-  document.addEventListener("click", function (event) {
-    if (event.target.classList.contains("add-button")) {
-      addToPlaylist(event);
-    }
-  });
-
-  document.addEventListener("click", function (event) {
-    if (event.target.classList.contains("minus-button")) {
-      removeFromPlaylist(event);
-    }
-  });
 
   fetch(url + "/playlist/get/songs", {
     method: "GET",
@@ -29,8 +27,11 @@ document.addEventListener("DOMContentLoaded", () => {
     .then((response) => response.json())
     .then((fetchedData) => {
       data = fetchedData;
-      renderTable();
-      renderMyPlaylist();
+      getMyPlaylist((result) => {
+        playlistArray = result;
+        renderTable();
+        renderMyPlaylist();
+      });
     })
     .catch((error) => {
       console.error(error);
@@ -53,10 +54,7 @@ function renderTable() {
     songList += "<td>" + data[i].id + "</td>";
     songList += "<td>" + data[i].title + "</td>";
     songList += "<td>" + data[i].releaseDate + "</td>";
-    songList +=
-      '<td><button class="add-button" data-id="' +
-      data[i].id +
-      '">+</button></td>';
+    songList += `<td><i id="add-button" class="fa-solid fa-plus" data-id="${data[i].id}"></i></td>`;
     songList += "</tr>";
   }
 
@@ -76,53 +74,96 @@ function renderMyPlaylist() {
   myPlaylist += "<td>Actions</td>";
   myPlaylist += "</tr>";
 
-  getMyPlaylist((result) => {
-    for (let i = 0; i < result.length; i++) {
-      myPlaylist += `<tr id="playlistRow${result[i].index}">`;
-      myPlaylist += "<td>" + result[i].index + "</td>";
-      myPlaylist += "<td>" + result[i].title + "</td>";
-      myPlaylist +=
-        "<td><button class='minus-button' data-id=" +
-        result[i].index +
-        ">-</button> <button class='play-button'>Play</button></td>";
-      myPlaylist += "</tr>";
-    }
+  for (let i = 0; i < playlistArray.length; i++) {
+    myPlaylist += `<tr id="playlistRow${playlistArray[i].index}">`;
+    myPlaylist += "<td>" + playlistArray[i].index + "</td>";
+    myPlaylist += "<td>" + playlistArray[i].title + "</td>";
+    myPlaylist += `<td>
+    <i id="remove-button" class="fa-solid fa-circle-minus" data-id="${playlistArray[i].index}"></i>
+    <i class="fa-solid fa-play" data-index="${playlistArray[i].index}" data-title="${playlistArray[i].title}" data-src="${playlistArray[i].id}"></i>
+    </td>`;
+    myPlaylist += "</tr>";
+  }
 
-    myPlaylist += "</table>";
-    myPlaylist += "</div>";
+  myPlaylist += "</table>";
+  myPlaylist += "</div>";
+  document.getElementById("table-parent-container").innerHTML += myPlaylist;
 
-    document.getElementById("table-parent-container").innerHTML += myPlaylist;
-  });
+  const playButtons = document.getElementsByClassName("fa-solid fa-play");
+  for (let i = 0; i < playButtons.length; i++) {
+    playButtons[i].addEventListener("click", handlePlayButton);
+  }
+}
+
+function handlePlayButton(event) {
+  const button = event.target;
+  const songTitle = button.getAttribute("data-title");
+  const songSrc = button.getAttribute("data-src");
+  const songIndex = button.getAttribute("data-index");
+  const songTitleElement = document.querySelector(".progress-bar-container h3");
+  const songData = data.find((song) => song.id === parseInt(songSrc));
+
+  audioPlayer.src = url + "/playlist/get/playlist/song/" + songSrc + ".mp3";
+  audioPlayer.load();
+  audioPlayer.play();
+
+  songTitleElement.textContent = songTitle;
+  currentSongIndex = songIndex - 1;
+
+  playPauseButton.innerHTML =
+    '<i id="playPauseButton" class="fa-solid fa-pause"></i>';
+  isPlaying = true;
+  songData.index = songIndex
+  previousSongs.push(songData)
+
+  musicPlayer.style.display = "flex";
 }
 
 function removeFromPlaylist(event) {
   const rowID = event.target.getAttribute("data-id");
   const rowElement = document.getElementById("playlistRow" + rowID);
 
-  fetch("http://localhost:3000/playlist/remove/songs", {
+  fetch(url + "/playlist/remove/songs", {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ username: username, index: rowID}),
+    body: JSON.stringify({ username: username, index: rowID }),
   })
     .then((response) => response.json())
     .then((result) => {
       if (result) {
-        rowElement.remove()
+        rowElement.remove();
+        playlistArray = playlistArray.filter(
+          (song) => song.index !== parseInt(rowID)
+        );
+        playlistArray.forEach((song) => {
+          if (song.index > parseInt(rowID)) {
+            song.index--;
+          }
+        });
 
-        //update index and id
-        const rows = document.querySelectorAll('.my-playlist table tr[id^="playlistRow"]');
+        const rows = document.querySelectorAll(
+          '.my-playlist table tr[id^="playlistRow"]'
+        );
         for (let i = parseInt(rowID) - 1; i < rows.length; i++) {
           const currentIndex = rows[i].id.replace("playlistRow", "");
           const newIndex = currentIndex - 1;
           rows[i].id = "playlistRow" + newIndex;
-          rows[i].querySelector('.minus-button').setAttribute("data-id", newIndex);
-          rows[i].querySelector('td:first-child').innerText = newIndex;
+          rows[i]
+            .querySelector("#remove-button")
+            .setAttribute("data-id", newIndex);
+          rows[i].querySelector("td:first-child").innerText = newIndex;
+        }
+
+        if (playlistArray.length === 0) {
+          audioPlayer.pause();
+          audioPlayer.currentTime = 0;
+          musicPlayer.style.display = "none";
         }
       } else {
-        alert("Failed to remove song from playlist")
+        alert("Failed to remove song from playlist");
       }
     })
     .catch((error) => {
@@ -143,7 +184,7 @@ function getMyPlaylist(callback) {
       callback(fetchedData);
     })
     .catch((error) => {
-      callback([]);
+      console.log(error);
     });
 }
 
@@ -151,7 +192,7 @@ function addToPlaylist(event) {
   const songId = event.target.getAttribute("data-id");
   const songData = data.find((song) => song.id === parseInt(songId));
 
-  fetch("http://localhost:3000/playlist/add/songs", {
+  fetch(url + "/playlist/add/songs", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -165,20 +206,29 @@ function addToPlaylist(event) {
         let myPlaylistRow = `<tr id="playlistRow${result.data.index}">`;
         myPlaylistRow += "<td>" + result.data.index + "</td>";
         myPlaylistRow += "<td>" + result.data.title + "</td>";
-        myPlaylistRow +=
-          "<td><button class='minus-button' data-id=" +
-          result.data.index +
-          ">-</button> <button class='play-button'>Play</button></td>";
+        myPlaylistRow += `<td>
+        <i id="remove-button" class="fa-solid fa-circle-minus" data-id="${result.data.index}"></i>
+        <i class="fa-solid fa-play" data-index="${result.data.index}" data-title="${result.data.title}" data-src="${result.data.id}"></i>
+        </td>`;
+
         myPlaylistRow += "</tr>";
 
         const myPlaylistTable = document.querySelector(".my-playlist table");
         myPlaylistTable.innerHTML += myPlaylistRow;
+
+        const playButtons = document.getElementsByClassName("fa-solid fa-play");
+
+        for (let i = 0; i < playButtons.length; i++) {
+          playButtons[i].addEventListener("click", handlePlayButton);
+        }
+
+        playlistArray.push(result.data);
       } else {
         alert("Song already in playlist");
       }
     })
     .catch((error) => {
-      console.error(error);
+      console.log(error);
     });
 }
 
