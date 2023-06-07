@@ -70,9 +70,9 @@ function toggleShuffle() {
 
 function playPreviousSong() {
   if (playMode === "shuffle" && previousSongs.length > 1) {
-    currentSongIndex = playlistArray.indexOf(previousSongs[previousSongs.length - 1]);
     previousSongs.pop();
     playSong(previousSongs[previousSongs.length - 1], false);
+    currentSongIndex = playlistArray.findIndex(e => e.id === previousSongs[previousSongs.length - 1].id);
   } else {
     currentSongIndex = (currentSongIndex - 1 + playlistArray.length) % playlistArray.length;
     const previousSong = playlistArray[currentSongIndex];
@@ -81,13 +81,11 @@ function playPreviousSong() {
 }
 
 function playNextSong() {
-  console.log(previousSongs)
-  if (playMode === "shuffle") {
-    if (playlistArray.length > 1) {
+  if (playMode === "shuffle" && playlistArray.length > 1) {
       const nextSong = getRandomSong();
       currentSongIndex = playlistArray.indexOf(nextSong);
       playSong(nextSong, true);
-    }
+    
   } else {
     currentSongIndex = (currentSongIndex + 1) % playlistArray.length;
     const nextSong = playlistArray[currentSongIndex];
@@ -159,8 +157,14 @@ function handleSongEnd() {
   if (playMode === "sequential") {
     playNextSong();
   } else if (playMode === "shuffle") {
-    const nextSong = getRandomSong();
-    playSong(nextSong, true);
+    if (playlistArray.length > 1) {
+      const nextSong = getRandomSong();
+      currentSongIndex = playlistArray.indexOf(nextSong);
+      console.log(currentSongIndex)
+      playSong(nextSong, true);
+    } else {
+      playNextSong();
+    }
   } else if (playMode === "repeat") {
     audioPlayer.currentTime = 0;
     audioPlayer.play();

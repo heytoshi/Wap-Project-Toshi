@@ -113,8 +113,7 @@ function handlePlayButton(event) {
   playPauseButton.innerHTML =
     '<i id="playPauseButton" class="fa-solid fa-pause"></i>';
   isPlaying = true;
-  songData.index = songIndex
-  previousSongs.push(songData)
+  previousSongs.push({index: parseInt(songIndex), id: songData.id, title: songData.title})
 
   musicPlayer.style.display = "flex";
 }
