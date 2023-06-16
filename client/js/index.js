@@ -21,8 +21,8 @@ function loginUser() {
   })
     .then((response) => response.json())
     .then((data) => {
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("username", usernameInput.value);
+      sessionStorage.setItem("token", data.token);
+      sessionStorage.setItem("username", usernameInput.value);
       if (data.token) {
         window.location.href = "playlist.html";
       } else {

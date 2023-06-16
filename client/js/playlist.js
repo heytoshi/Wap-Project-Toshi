@@ -244,7 +244,7 @@ function addToPlaylist(event) {
 }
 
 function logoutUser() {
-  localStorage.removeItem("token");
-  localStorage.removeItem("username");
+  sessionStorage.removeItem("token");
+  sessionStorage.removeItem("username");
   window.location.href = "index.html";
 }
